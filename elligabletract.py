@@ -1,3 +1,23 @@
+import streamlit as st
+import pandas as pd
+import requests
+
+# Function to get census tract using Census Geocoder API
+def get_census_tract(street, city, state):
+    url = (f"https://geocoding.geo.census.gov/geocoder/geographies/address"
+           f"?street={requests.utils.quote(street)}"
+           f"&city={requests.utils.quote(city)}" 
+           f"&state={requests.utils.quote(state)}"
+           f"&benchmark=Public_AR_Census2020"
+           f"&vintage=Census2020_Census2020"
+           f"&layers=10"
+           f"&format=json")
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return "Error in API call"
+
 # Extract GEOID, BLOCK, ZIP, and coordinates from the response
 def extract_details(data):
     try:
@@ -12,6 +32,9 @@ def extract_details(data):
         return geoid, block, zip_code, x, y
     except (IndexError, KeyError):
         return None, None, None, None, None
+
+# Read in CSV 
+df = pd.read_csv('https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv')
 
 # Streamlit app
 def main():
@@ -31,10 +54,10 @@ def main():
             st.write(f"GEOID: {geoid}")
             st.write(f"BLOCK: {block}")
             st.write(f"ZIP Code: {zip_code}")
-            st.write(f"Coordinates: ({y}, {x})")  # Display coordinates (Latitude, Longitude)
+            st.write(f"Coordinates: (Latitude: {y}, Longitude: {x})")  # Display coordinates
 
         # Check eligibility based on GEOID
-        if geoid in df['GEOID'].values:
+        if geoid and geoid in df['GEOID'].values:
             st.write("This is an eligible location based on MD HB 550") 
         else:
             st.write("This is NOT an eligible location based on MD HB 550")
