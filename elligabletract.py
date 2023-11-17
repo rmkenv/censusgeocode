@@ -36,81 +36,47 @@ def extract_details(data):
         st.error("Could not extract details from the response")
         return None, None, None, None, None
 
-# Function to display a map with a given point and a GeoJSON layer
-def display_map(latitude, longitude, geojson_url):
+# Display a map with GeoJSON points
+def display_map(geojson_data):
     # Define initial view state
     view_state = pdk.ViewState(
-        latitude=latitude,
-        longitude=longitude,
-        zoom=11,
+        latitude=38.806352,  # Center of Maryland Latitude
+        longitude=-77.268416,  # Center of Maryland Longitude
+        zoom=7,
         pitch=0,
         bearing=0
     )
 
-    # Layer for the found coordinates point
-    point_layer = pdk.Layer(
-        'ScatterplotLayer',
-        data=[{'position': [longitude, latitude], 'size': 1000}],
-        get_position='position',
-        get_radius='size',
-        get_color=[255, 0, 0],
-        pickable=True
-    )
-
     # Layer for the GeoJSON data
-    geojson_layer = pdk.Layer(
+    schools_layer = pdk.Layer(
         "GeoJsonLayer",
-        data=geojson_url,
-        opacity=0.5,
-        stroked=True,
-        filled=True,
-        extruded=True,
-        wireframe=True,
-        get_fill_color=[255, 180, 0],
-        pickable=True
+        data=geojson_data,
+        get_fill_color=[0, 0, 255, 160],  # Set the fill color to blue
+        pickable=True,  # Allow each feature to be clickable
+        auto_highlight=True,  # Automatically highlight the feature on hover
+        tooltip="SCHOOL_NAME"  # Set the tooltip to the school name
     )
 
-    # Render the map with both layers
+    # Render the map with the schools layer
     st.pydeck_chart(pdk.Deck(
         map_style='mapbox://styles/mapbox/light-v9',
         initial_view_state=view_state,
-        layers=[point_layer, geojson_layer],
-        tooltip={"text": "{name}"}
+        layers=[schools_layer]
     ))
-
-# Read in CSV 
-df = pd.read_csv('https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv')
 
 # Streamlit app
 def main():
-    st.title("Census Tract Finder")
+    st.title("Maryland Education Facilities - PreK thru 12")
 
-    # Get user inputs
-    street = st.text_input("Street", "1800 Washington Bvld")
-    city = st.text_input("City", "Baltimore") 
-    state = st.text_input("State", "MD")
+    # GeoJSON data for schools in Maryland
+    geojson_data = {
+        "type": "FeatureCollection",
+        # ... [Include the rest of the GeoJSON data here] ...
+    }
 
-    if st.button("Find Census Tract"):
-        data = get_census_tract(street, city, state)
-        if data:
-            geoid, block, zip_code, x, y = extract_details(data)
-            
-            # Display the map with the found coordinates and the GeoJSON layer
-            if y and x:
-                geojson_url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/Maryland_Education_Facilities_-_PreK_thru_12_Education_(Public_Schools).geojson'
-                display_map(y, x, geojson_url)
-
-            # Display GEOID, BLOCK, and ZIP if they were found
-            if geoid and block:
-                st.write(f"GEOID: {geoid}")
-                st.write(f"BLOCK: {block}")
-                st.write(f"ZIP Code: {zip_code}")
-
-            # Check eligibility based on GEOID
-            if geoid and geoid in df['GEOID'].values:
-                st.success("This is an eligible location based on MD HB 550") 
-            else:
-                st.error("This is NOT an eligible location based on MD HB 550")
+    # Button to display schools on map
+    if st.button("Display Schools on Map"):
+        display_map(geojson_data)
 
 if __name__ == "__main__":
     main()
