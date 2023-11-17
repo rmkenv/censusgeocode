@@ -6,7 +6,7 @@ import requests
 @st.cache  # Correct decorator
 def load_data():
     try:
-        url = 'https://raw.githubusercontent.com/user/repo/master/census.csv'  # Ensure the URL is correct
+        url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv'  # Ensure the URL is correct
         df = pd.read_csv(url)
         return df
     except Exception as e:
