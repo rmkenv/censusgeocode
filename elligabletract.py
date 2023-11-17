@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+import pydeck as pdk
 
 # Function to get census tract using Census Geocoder API
 def get_census_tract(street, city, state):
@@ -33,6 +34,25 @@ def extract_details(data):
     except (IndexError, KeyError):
         return None, None, None, None, None
 
+# Function to create a map with a GeoJSON layer
+def create_map(latitude, longitude, geojson_url):
+    # Define a layer to display on the map
+    geojson_layer = pdk.Layer(
+        "GeoJsonLayer",
+        data=geojson_url,
+        opacity=0.8,
+        stroked=False,
+        filled=True,
+        extruded=True,
+        wireframe=True,
+    )
+    
+    # Set the viewport location
+    view_state = pdk.ViewState(latitude=latitude, longitude=longitude, zoom=11, bearing=0, pitch=0)
+
+    # Render the map
+    st.pydeck_chart(pdk.Deck(layers=[geojson_layer], initial_view_state=view_state))
+
 # Read in CSV 
 df = pd.read_csv('https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv')
 
@@ -61,6 +81,12 @@ def main():
             st.write("This is an eligible location based on MD HB 550") 
         else:
             st.write("This is NOT an eligible location based on MD HB 550")
+        
+        # Create and display the map if coordinates are found
+        if y and x:
+            # URL to the GeoJSON data on GitHub (replace with your actual URL)
+            geojson_url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/Maryland_Education_Facilities_-_PreK_thru_12_Education_(Public_Schools).geojson'
+            create_map(y, x, geojson_url)
 
 if __name__ == "__main__":
     main()
