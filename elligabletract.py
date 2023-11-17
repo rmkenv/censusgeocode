@@ -2,78 +2,59 @@ import streamlit as st
 import pandas as pd
 import requests
 
-# Load data
-@st.cache  # Correct decorator
-def load_data():
-    try:
-        url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv'  # Ensure the URL is correct
-        df = pd.read_csv(url)
-        return df
-    except Exception as e:
-        st.error(f"Failed to load data: {e}")
-        return pd.DataFrame()  # Return an empty DataFrame on error
+# Function to get census tract using Census Geocoder API
+def get_census_tract(street, city, state):
 
-df = load_data()
+  url = (f"https://geocoding.geo.census.gov/geocoder/geographies/address"
+         f"?street={requests.utils.quote(street)}"
+         f"&city={requests.utils.quote(city)}" 
+         f"&state={requests.utils.quote(state)}"
+         f"&benchmark=Public_AR_Census2020"
+         f"&vintage=Census2020_Census2020"
+         f"&layers=10"
+         f"&format=json")
 
-# Get eligible GEOIDs
-eligible_geoids = df['GEOID'].astype(str).tolist() if not df.empty else [] 
+  response = requests.get(url)
+  
+  if response.status_code == 200:
+    return response.json()
+  else:
+    return "Error in API call"
 
-# Census API function
-def get_census_data(street, city, state):
-    url = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
-    params = {
-        "address": f"{street}, {city}, {state}", 
-        "benchmark": "Public_AR_Census2020",
-        "vintage": "Census2020_Census2020",
-        "layers": "10", 
-        "format": "json"
-    }  
+# Extract GEOID and BLOCK from the response
+def extract_geoid_block(data):
 
-    try:
-        response = requests.get(url, params=params)
-        data = response.json()
+  try:
+    census_block = data['result']['addressMatches'][0]['geographies']['Census Blocks'][0]
+    geoid = census_block['GEOID']
+    block = census_block['BLOCK']
+    return geoid, block
+  
+  except (IndexError, KeyError):
+    return None, None
 
-        if 'result' not in data:
-            raise Exception("No result in response")
-
-        result = data['result']
-
-        if 'addressMatches' not in result or not result['addressMatches']:
-            raise Exception("No address matches found")
-
-        address_match = result['addressMatches'][0]
-
-        if 'geographies' not in address_match:
-            raise Exception("No geographies found")
-
-        geo = address_match['geographies']['Census Blocks'][0]  # Make sure the key matches the JSON structure
-
-        census_tract = geo.get('TRACT', 'N/A')  # Use get to avoid KeyError
-        census_block = geo.get('BLOCK', 'N/A')
-
-        return census_tract, census_block
-
-    except Exception as e:
-        st.error(f"Error: {e}")
-        return None, None  # Make sure to return after logging error
+# Read in CSV 
+df = pd.read_csv('https://github.com/rmkenv/censusgeocode/blob/main/MD_HB550_ECT.csv')
 
 # Streamlit app
-st.title('Census Tract Finder') 
+def main():
 
-street = st.text_input('Street')
-city = st.text_input('City')  
-state = st.text_input('State')
+  st.title("Census Tract Finder")
 
-if st.button('Find Census Tract'):
-    census_tract, census_block = get_census_data(street, city, state)
+  # Get user inputs
+  street = st.text_input("Street", "4600 Silver Hill Rd")
+  city = st.text_input("City", "Washington") 
+  state = st.text_input("State", "DC")
 
-    if census_tract and census_block:  # Check both values
-        st.write(f"Census Tract: {census_tract}")
-        st.write(f"Census Block: {census_block}")
+  if st.button("Find Census Tract"):
 
-        if census_tract in eligible_geoids:
-            st.success("Location is eligible")
-        else:
-            st.error("Location is not eligible")
+    data = get_census_tract(street, city, state)
+    geoid, _ = extract_geoid_block(data)
+
+    if geoid in df['GEOID'].values:
+      st.write("Good!") 
     else:
-        st.error("Could not find census data for the location")
+      st.write("Bad")
+      
+if __name__ == "__main__":
+  main()
