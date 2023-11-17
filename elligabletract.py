@@ -1,20 +1,47 @@
 import streamlit as st
-import requests
 import pandas as pd
+import requests
 
-# Assuming you've uploaded the CSV file on GitHub and have its raw URL
+# Replace with the actual URL of your CSV file
 CSV_URL = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT'
 
-# Function to fetch and read the CSV from GitHub
-@st.cache
+# GEOID column name
+GEOID_COLUMN_NAME = 'GEOID'
+
+# New caching mechanism as per Streamlit's update
+@st.experimental_memo
 def get_eligible_geoids():
-    # Fetch the CSV file from the GitHub raw URL
-    df = pd.read_csv(CSV_URL)
-    # Assuming the GEOID/Census Tract Identifier is in the 'GEOID' column
-    eligible_geoids = df['GEOID'].astype(str).tolist()
+    df = pd.read_excel(CSV_URL)
+    eligible_geoids = df[GEOID_COLUMN_NAME].astype(str).tolist()
     return eligible_geoids
 
-# Modify your existing Streamlit app layout function
+# Function to get census tract using Census Geocoder API
+def get_census_tract(street, city, state):
+    url = (f"https://geocoding.geo.census.gov/geocoder/geographies/address"
+           f"?street={requests.utils.quote(street)}"
+           f"&city={requests.utils.quote(city)}"
+           f"&state={requests.utils.quote(state)}"
+           f"&benchmark=Public_AR_Census2020"
+           f"&vintage=Census2020_Census2020"
+           f"&layers=10"
+           f"&format=json")
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return "Error in API call"
+
+# Extract GEOID and BLOCK from the response
+def extract_geoid_block(data):
+    try:
+        census_block = data['result']['addressMatches'][0]['geographies']['Census Blocks'][0]
+        geoid = census_block['GEOID']
+        block = census_block['BLOCK']
+        return geoid, block
+    except (IndexError, KeyError):
+        return None, None
+
+# Streamlit app layout
 def main():
     st.title("Census Tract Finder")
 
