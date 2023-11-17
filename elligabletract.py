@@ -34,7 +34,7 @@ def extract_geoid_block(data):
     return None, None
 
 # Read in CSV 
-df = pd.read_csv('https://github.com/rmkenv/censusgeocode/blob/main/MD_HB550_ECT.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv')')
 
 # Streamlit app
 def main():
