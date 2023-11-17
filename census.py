@@ -21,6 +21,16 @@ def get_census_tract(street, city, state):
     else:
         return "Error in API call"
 
+# Extract GEOID and BLOCK from the response
+def extract_geoid_block(data):
+    try:
+        census_block = data['result']['addressMatches'][0]['geographies']['Census Blocks'][0]
+        geoid = census_block['GEOID']
+        block = census_block['BLOCK']
+        return geoid, block
+    except (IndexError, KeyError):
+        return None, None
+
 # Streamlit app layout
 def main():
     st.title("Census Tract Finder")
@@ -31,11 +41,20 @@ def main():
     state = st.text_input("State", "DC")
 
     if st.button("Find Census Tract"):
-        result = get_census_tract(street, city, state)
-        if isinstance(result, dict):
-            st.json(result)
+        response_data = get_census_tract(street, city, state)
+        if isinstance(response_data, dict):
+            # Show the full JSON response collapsed
+            st.expander("Full JSON Response", expanded=False).json(response_data)
+
+            # Extract and display GEOID and BLOCK
+            geoid, block = extract_geoid_block(response_data)
+            if geoid and block:
+                st.write(f"GEOID: {geoid}")
+                st.write(f"BLOCK: {block}")
+            else:
+                st.write("GEOID and BLOCK could not be extracted.")
         else:
-            st.write(result)
+            st.write(response_data)
 
 if __name__ == "__main__":
     main()
