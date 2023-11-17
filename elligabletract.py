@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-import pydeck as pdk
 
 # Function to get census tract using Census Geocoder API
 def get_census_tract(street, city, state):
@@ -17,8 +16,7 @@ def get_census_tract(street, city, state):
     if response.status_code == 200:
         return response.json()
     else:
-        st.error("Error in API call")
-        return None
+        return "Error in API call"
 
 # Extract GEOID, BLOCK, ZIP, and coordinates from the response
 def extract_details(data):
@@ -33,50 +31,36 @@ def extract_details(data):
         y = coordinates['y']
         return geoid, block, zip_code, x, y
     except (IndexError, KeyError):
-        st.error("Could not extract details from the response")
         return None, None, None, None, None
 
-# Display a map with GeoJSON points
-def display_map(geojson_data):
-    # Define initial view state
-    view_state = pdk.ViewState(
-        latitude=38.806352,  # Center of Maryland Latitude
-        longitude=-77.268416,  # Center of Maryland Longitude
-        zoom=7,
-        pitch=0,
-        bearing=0
-    )
-
-    # Layer for the GeoJSON data
-    schools_layer = pdk.Layer(
-        "GeoJsonLayer",
-        data=geojson_data,
-        get_fill_color=[0, 0, 255, 160],  # Set the fill color to blue
-        pickable=True,  # Allow each feature to be clickable
-        auto_highlight=True,  # Automatically highlight the feature on hover
-        tooltip="SCHOOL_NAME"  # Set the tooltip to the school name
-    )
-
-    # Render the map with the schools layer
-    st.pydeck_chart(pdk.Deck(
-        map_style='mapbox://styles/mapbox/light-v9',
-        initial_view_state=view_state,
-        layers=[schools_layer]
-    ))
+# Read in CSV 
+df = pd.read_csv('https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv')
 
 # Streamlit app
 def main():
-    st.title("Maryland Education Facilities - PreK thru 12")
+    st.title("Census Tract Finder")
 
-    # GeoJSON data for schools in Maryland
-    geojson_data = {
-        "type": "FeatureCollection",
-        # ... [Include the rest of the GeoJSON data here] ...
-    }
+    # Get user inputs
+    street = st.text_input("Street", "1800 Washington Bvld")
+    city = st.text_input("City", "Baltimore") 
+    state = st.text_input("State", "MD")
 
-    # Button to display schools on map
-    if st.button("Display Schools on Map"):
-        display_map(geojson_data)
+    if st.button("Find Census Tract"):
+        data = get_census_tract(street, city, state)
+        geoid, block, zip_code, x, y = extract_details(data)
+
+        # Display GEOID, BLOCK, ZIP, and coordinates if they were found
+        if geoid and block:
+            st.write(f"GEOID: {geoid}")
+            st.write(f"BLOCK: {block}")
+            st.write(f"ZIP Code: {zip_code}")
+            st.write(f"Coordinates: (Latitude: {y}, Longitude: {x})")  # Display coordinates
+
+        # Check eligibility based on GEOID
+        if geoid and geoid in df['GEOID'].values:
+            st.write("This is an eligible location based on MD HB 550") 
+        else:
+            st.write("This is NOT an eligible location based on MD HB 550")
 
 if __name__ == "__main__":
     main()
