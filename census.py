@@ -3,32 +3,39 @@ import requests
 
 # Function to get census tract using Census Geocoder API
 def get_census_tract(address):
-    url = f'https://geocoding.geo.census.gov/geocoder/geographies/address?street={address}&benchmark=Public_AR_Census2020&format=json'
+    # Format the address for URL encoding
+    formatted_address = requests.utils.quote(address)
+    
+    # Construct the API request URL
+    url = (f"https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
+           f"?address={formatted_address}&benchmark=Public_AR_Current&format=json")
+
+    # Make the API request
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
         try:
-            # Extracting the GeoID and Census Tract Name
-            result = data['result']['addressMatches'][0]['geographies']['Census Tracts'][0]
-            geoid = result['GEOID']
-            name = result['NAME']
-            return geoid, name
+            # Extracting the address match
+            result = data['result']['addressMatches'][0]
+            return result
         except IndexError:
-            return "No match found", "No match found"
+            return "No match found"
     else:
-        return "Error in API call", "Error in API call"
+        return "Error in API call"
 
 # Streamlit app layout
 def main():
     st.title("Census Tract Finder")
     
     # Address input
-    address = st.text_input("Enter the address:", "1800 Washington Blvd, Baltimore, MD, 21230")
+    address = st.text_input("Enter the address:", "4600 Silver Hill Rd, Washington, DC 20233")
     
     if st.button("Find Census Tract"):
-        geoid, name = get_census_tract(address)
-        st.write(f"GeoID: {geoid}")
-        st.write(f"Census Tract Name: {name}")
+        result = get_census_tract(address)
+        if isinstance(result, dict):
+            st.json(result)
+        else:
+            st.write(result)
 
 if __name__ == "__main__":
     main()
