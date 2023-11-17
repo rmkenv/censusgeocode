@@ -8,10 +8,9 @@ CSV_URL = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_
 # GEOID column name
 GEOID_COLUMN_NAME = 'GEOID'
 
-# New caching mechanism as per Streamlit's update
-@st.experimental_memo
+@st.cache_data
 def get_eligible_geoids():
-    df = pd.read_excel(CSV_URL)
+    df = pd.read_excel(CSV_URL, engine='openpyxl')
     eligible_geoids = df[GEOID_COLUMN_NAME].astype(str).tolist()
     return eligible_geoids
 
