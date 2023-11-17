@@ -1,77 +1,60 @@
 import streamlit as st
-import pandas as pd
+import pandas as pd 
 import requests
 
-# Replace with the actual URL of your CSV file
-CSV_URL = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT'
+# Load data from GitHub URL 
+@st.cache
+def load_data():
+    url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT'
+    df = pd.read_csv(url)
+    return df
 
-# GEOID column name
-GEOID_COLUMN_NAME = 'GEOID'
+df = load_data() 
 
-@st.cache_data
-def get_eligible_geoids():
-    df = pd.read_excel(CSV_URL, engine='openpyxl')
-    eligible_geoids = df[GEOID_COLUMN_NAME].astype(str).tolist()
-    return eligible_geoids
+# Extract eligible GEOIDs
+eligible_geoids = df['GEOID'].astype(str).tolist()
 
-# Function to get census tract using Census Geocoder API
-def get_census_tract(street, city, state):
-    url = (f"https://geocoding.geo.census.gov/geocoder/geographies/address"
-           f"?street={requests.utils.quote(street)}"
-           f"&city={requests.utils.quote(city)}"
-           f"&state={requests.utils.quote(state)}"
-           f"&benchmark=Public_AR_Census2020"
-           f"&vintage=Census2020_Census2020"
-           f"&layers=10"
-           f"&format=json")
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
+# Census API function 
+def get_census_data(street, city, state):
+    url = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
+    params = {
+        "address": f"{street}, {city}, {state}", 
+        "benchmark": "Public_AR_Census2020",
+        "vintage": "Census2020_Census2020", 
+        "layers": "10",
+        "format": "json"
+    }
+    
+    response = requests.get(url, params=params)
+    
+    if response.ok:
+        data = response.json()
+        return data['result']['geographies']
     else:
-        return "Error in API call"
+        return None
 
-# Extract GEOID and BLOCK from the response
-def extract_geoid_block(data):
-    try:
-        census_block = data['result']['addressMatches'][0]['geographies']['Census Blocks'][0]
-        geoid = census_block['GEOID']
-        block = census_block['BLOCK']
-        return geoid, block
-    except (IndexError, KeyError):
-        return None, None
+# Streamlit UI
+st.title("Census Tract Finder")
 
-# Streamlit app layout
-def main():
-    st.title("Census Tract Finder")
+street = st.text_input("Street")  
+city = st.text_input("City")
+state = st.text_input("State")
 
-    # Address inputs
-    street = st.text_input("Street", "4600 Silver Hill Rd")
-    city = st.text_input("City", "Washington")
-    state = st.text_input("State", "DC")
+if st.button("Find Census Tract"):
 
-    # Load eligible GEOIDs
-    eligible_geoids = get_eligible_geoids()
-
-    if st.button("Find Census Tract"):
-        response_data = get_census_tract(street, city, state)
-        if isinstance(response_data, dict):
-            # Show the full JSON response collapsed
-            st.expander("Full JSON Response", expanded=False).json(response_data)
-
-            # Extract and display GEOID and BLOCK
-            geoid, block = extract_geoid_block(response_data)
-            if geoid and block:
-                st.write(f"GEOID: {geoid}")
-                st.write(f"BLOCK: {block}")
-                # Check if the location is eligible
-                if geoid in eligible_geoids:
-                    st.success("This location is an eligible location under MD HB 550.")
-                else:
-                    st.error("This location is not eligible under MD HB 550.")
-            else:
-                st.write("GEOID and BLOCK could not be extracted.")
+    data = get_census_data(street, city, state)
+    
+    if data:
+        census_tract = data['Census Tracts'][0]['GEOID']
+        census_block = data['Census Blocks'][0]['GEOID']
+        
+        st.write(f"Census Tract: {census_tract}")
+        st.write(f"Census Block: {census_block}")
+        
+        if census_tract in eligible_geoids:
+            st.success("Location is eligible")
         else:
-            st.write(response_data)
-
-if __name__ == "__main__":
-    main()
+            st.error("Location is not eligible")
+            
+    else:
+        st.error("Error getting census data")
