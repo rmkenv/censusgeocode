@@ -38,30 +38,45 @@ def extract_details(data):
 
 # Function to display a map with a given point and a GeoJSON layer
 def display_map(latitude, longitude, geojson_url):
-    # Define a layer to display the point
-    point_layer = pdk.Layer(
-        "ScatterplotLayer",
-        data=[{"position": [longitude, latitude], "color": [255, 0, 0], "radius": 100}],
-        get_position="position",
-        get_color="color",
-        get_radius="radius",
+    # Define initial view state
+    view_state = pdk.ViewState(
+        latitude=latitude,
+        longitude=longitude,
+        zoom=11,
+        pitch=0,
+        bearing=0
     )
 
-    # Define a layer for the GeoJSON
+    # Layer for the found coordinates point
+    point_layer = pdk.Layer(
+        'ScatterplotLayer',
+        data=[{'position': [longitude, latitude], 'size': 1000}],
+        get_position='position',
+        get_radius='size',
+        get_color=[255, 0, 0],
+        pickable=True
+    )
+
+    # Layer for the GeoJSON data
     geojson_layer = pdk.Layer(
         "GeoJsonLayer",
         data=geojson_url,
         opacity=0.5,
-        stroked=False,
+        stroked=True,
         filled=True,
         extruded=True,
+        wireframe=True,
+        get_fill_color=[255, 180, 0],
+        pickable=True
     )
 
-    # Set the view state for the map
-    view_state = pdk.ViewState(latitude=latitude, longitude=longitude, zoom=12)
-
     # Render the map with both layers
-    st.pydeck_chart(pdk.Deck(layers=[point_layer, geojson_layer], initial_view_state=view_state))
+    st.pydeck_chart(pdk.Deck(
+        map_style='mapbox://styles/mapbox/light-v9',
+        initial_view_state=view_state,
+        layers=[point_layer, geojson_layer],
+        tooltip={"text": "{name}"}
+    ))
 
 # Read in CSV 
 df = pd.read_csv('https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv')
@@ -79,6 +94,12 @@ def main():
         data = get_census_tract(street, city, state)
         if data:
             geoid, block, zip_code, x, y = extract_details(data)
+            
+            # Display the map with the found coordinates and the GeoJSON layer
+            if y and x:
+                geojson_url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/Maryland_Education_Facilities_-_PreK_thru_12_Education_(Public_Schools).geojson'
+                display_map(y, x, geojson_url)
+
             # Display GEOID, BLOCK, and ZIP if they were found
             if geoid and block:
                 st.write(f"GEOID: {geoid}")
@@ -90,12 +111,6 @@ def main():
                 st.success("This is an eligible location based on MD HB 550") 
             else:
                 st.error("This is NOT an eligible location based on MD HB 550")
-
-            # Display the map with the found coordinates and the GeoJSON layer
-            if y and x:
-                # URL to the GeoJSON data on GitHub (replace with your actual URL)
-                geojson_url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/Maryland_Education_Facilities_-_PreK_thru_12_Education_(Public_Schools).geojson'
-                display_map(y, x, geojson_url)
 
 if __name__ == "__main__":
     main()
