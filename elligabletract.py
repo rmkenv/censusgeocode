@@ -46,15 +46,17 @@ def main():
   city = st.text_input("City", "Baltimore") 
   state = st.text_input("State", "MD")
 
-  if st.button("Find Census Tract"):
+ if st.button("Find Census Tract"):
+    response_data = get_census_tract(street, city, state)
+    geoid, block = extract_geoid_block(response_data)
 
-    data = get_census_tract(street, city, state)
-    geoid, _ = extract_geoid_block(data)
+    # Display GEOID and BLOCK if they were found
+    if geoid and block:
+        st.write(f"GEOID: {geoid}")
+        st.write(f"BLOCK: {block}")
 
+    # Check eligibility based on GEOID
     if geoid in df['GEOID'].values:
-      st.write("This is an eligible location based on MD HB 550") 
+        st.write("This is an eligible location based on MD HB 550") 
     else:
-      st.write("This is NOT an eligible location based on MD HB 550")
-      
-if __name__ == "__main__":
-  main()
+        st.write("This is NOT an eligible location based on MD HB 550")
