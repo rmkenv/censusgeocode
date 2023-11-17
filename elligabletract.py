@@ -17,7 +17,8 @@ def get_census_tract(street, city, state):
     if response.status_code == 200:
         return response.json()
     else:
-        return "Error in API call"
+        st.error("Error in API call")
+        return None
 
 # Extract GEOID, BLOCK, ZIP, and coordinates from the response
 def extract_details(data):
@@ -32,26 +33,35 @@ def extract_details(data):
         y = coordinates['y']
         return geoid, block, zip_code, x, y
     except (IndexError, KeyError):
+        st.error("Could not extract details from the response")
         return None, None, None, None, None
 
-# Function to create a map with a GeoJSON layer
-def create_map(latitude, longitude, geojson_url):
-    # Define a layer to display on the map
+# Function to display a map with a given point and a GeoJSON layer
+def display_map(latitude, longitude, geojson_url):
+    # Define a layer to display the point
+    point_layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=[{"position": [longitude, latitude], "color": [255, 0, 0], "radius": 100}],
+        get_position="position",
+        get_color="color",
+        get_radius="radius",
+    )
+
+    # Define a layer for the GeoJSON
     geojson_layer = pdk.Layer(
         "GeoJsonLayer",
         data=geojson_url,
-        opacity=0.8,
+        opacity=0.5,
         stroked=False,
         filled=True,
         extruded=True,
-        wireframe=True,
     )
-    
-    # Set the viewport location
-    view_state = pdk.ViewState(latitude=latitude, longitude=longitude, zoom=11, bearing=0, pitch=0)
 
-    # Render the map
-    st.pydeck_chart(pdk.Deck(layers=[geojson_layer], initial_view_state=view_state))
+    # Set the view state for the map
+    view_state = pdk.ViewState(latitude=latitude, longitude=longitude, zoom=12)
+
+    # Render the map with both layers
+    st.pydeck_chart(pdk.Deck(layers=[point_layer, geojson_layer], initial_view_state=view_state))
 
 # Read in CSV 
 df = pd.read_csv('https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_HB550_ECT.csv')
@@ -67,26 +77,25 @@ def main():
 
     if st.button("Find Census Tract"):
         data = get_census_tract(street, city, state)
-        geoid, block, zip_code, x, y = extract_details(data)
+        if data:
+            geoid, block, zip_code, x, y = extract_details(data)
+            # Display GEOID, BLOCK, and ZIP if they were found
+            if geoid and block:
+                st.write(f"GEOID: {geoid}")
+                st.write(f"BLOCK: {block}")
+                st.write(f"ZIP Code: {zip_code}")
 
-        # Display GEOID, BLOCK, ZIP, and coordinates if they were found
-        if geoid and block:
-            st.write(f"GEOID: {geoid}")
-            st.write(f"BLOCK: {block}")
-            st.write(f"ZIP Code: {zip_code}")
-            st.write(f"Coordinates: (Latitude: {y}, Longitude: {x})")  # Display coordinates
+            # Check eligibility based on GEOID
+            if geoid and geoid in df['GEOID'].values:
+                st.success("This is an eligible location based on MD HB 550") 
+            else:
+                st.error("This is NOT an eligible location based on MD HB 550")
 
-        # Check eligibility based on GEOID
-        if geoid and geoid in df['GEOID'].values:
-            st.write("This is an eligible location based on MD HB 550") 
-        else:
-            st.write("This is NOT an eligible location based on MD HB 550")
-        
-        # Create and display the map if coordinates are found
-        if y and x:
-            # URL to the GeoJSON data on GitHub (replace with your actual URL)
-            geojson_url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/Maryland_Education_Facilities_-_PreK_thru_12_Education_(Public_Schools).geojson'
-            create_map(y, x, geojson_url)
+            # Display the map with the found coordinates and the GeoJSON layer
+            if y and x:
+                # URL to the GeoJSON data on GitHub (replace with your actual URL)
+                geojson_url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/Maryland_Education_Facilities_-_PreK_thru_12_Education_(Public_Schools).geojson'
+                display_map(y, x, geojson_url)
 
 if __name__ == "__main__":
     main()
