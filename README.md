@@ -34,7 +34,7 @@ To run the web application:
 
 1. The user enters a street address.
 2. Upon clicking "Find Census Tract", the app calls the Census Geocoder API.
-3. If successful, it displays the GEOID, block number, zip code, and coordinates.
+3. If successful, it displays the GEOID, block number, County, zip code, and coordinates.
 4. It then checks if the GEOID matches an eligible location according to MD HB 550 and informs the user accordingly.
 
 ## Notes
