@@ -4,7 +4,19 @@ import requests
 
 # Function to get census tract using Census Geocoder API
 def get_census_tract(street, city, state):
-    # ... (No changes in this function)
+    url = (f"https://geocoding.geo.census.gov/geocoder/geographies/address"
+           f"?street={requests.utils.quote(street)}"
+           f"&city={requests.utils.quote(city)}"
+           f"&state={requests.utils.quote(state)}"
+           f"&benchmark=Public_AR_Census2020"
+           f"&vintage=Census2020_Census2020"
+           f"&layers=10"
+           f"&format=json")
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return "Error in API call"
 
 # Extract GEOID, BLOCK, ZIP, tract, and coordinates from the response
 def extract_details(data):
@@ -27,7 +39,7 @@ hb550_df = pd.read_csv('https://raw.githubusercontent.com/rmkenv/censusgeocode/m
 
 # Function to get Census Tract and County Name from GEOID
 def get_tract_info(geoid, tract):
-    tract_info = hb550_df[hb550_df['GEOID'] == geoid]
+    tract_info = hb550_df[hb550_df['GEOID'].astype(str).str.contains(tract)]
     if not tract_info.empty:
         tract_name = tract_info.iloc[0]['Census Tract']
         county_name = tract_info.iloc[0]['County Name']
@@ -49,7 +61,7 @@ def main():
         geoid, block, tract, zip_code, x, y = extract_details(data)
         tract_name, county_name = get_tract_info(geoid, tract)
 
-        # Display GEOID, BLOCK, TRACT, COUNTY NAME, ZIP, and coordinates if they were found
+        # Display GEOID, BLOCK, CENSUS TRACT, COUNTY NAME, ZIP, and coordinates if they were found
         if geoid and block:
             st.write(f"GEOID: {geoid}")
             st.write(f"BLOCK: {block}")
