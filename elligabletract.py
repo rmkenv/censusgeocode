@@ -50,11 +50,7 @@ def get_tract_info(geoid, tract):
 # Streamlit app
 def main():
     st.title("Census Tract Finder")
-    # Additional information link
-    st.markdown(
-        "For additional information on MD HB 550 please visit "
-        "[MD HB 550 Information](https://mgaleg.maryland.gov/2023RS/chapters_noln/Ch_98_hb0550T.pdf)"
-    )
+
     # Get user inputs
     street = st.text_input("Street", "1800 Washington Bvld")
     city = st.text_input("City", "Baltimore")
@@ -74,17 +70,11 @@ def main():
             st.write(f"ZIP Code: {zip_code}")
             st.write(f"Coordinates: (Latitude: {y}, Longitude: {x})")
 
-            # Check eligibility based on GEOID
-            if geoid in hb550_df['GEOID'].values:
-                st.markdown(
-                    f"<h3>This location <b>is eligible</b> based on "
-                    f"[MD HB 550](https://mgaleg.maryland.gov/2023RS/chapters_noln/Ch_98_hb0550T.pdf)</h3>", 
-                    unsafe_allow_html=True)
-            else:
-                st.markdown(
-                    f"<h3>This location <b><u>is NOT eligible</u></b> based on "
-                    f"[MD HB 550](https://mgaleg.maryland.gov/2023RS/chapters_noln/Ch_98_hb0550T.pdf)</h3>", 
-                    unsafe_allow_html=True)
+        # Check eligibility based on GEOID
+        if geoid and geoid in hb550_df['GEOID'].values:
+            st.write("This location is eligible based on MD HB 550")
+        else:
+            st.write("This location is NOT eligible based on MD HB 550")
 
 if __name__ == "__main__":
     main()
