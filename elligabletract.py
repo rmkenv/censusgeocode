@@ -52,7 +52,8 @@ def main():
             try:
                 address_matches = result['result']['addressMatches'][0]
                 census_block = address_matches['geographies']['Census Blocks'][0]
-                geoid = census_block['GEOID']
+                geoid_full = census_block['GEOID']
+                geoid = geoid_full[:-4]
                 block = census_block['BLOCK']
                 blkgrp = census_block['BLKGRP']
                 
