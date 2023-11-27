@@ -44,18 +44,3 @@ For any queries or feedback regarding the Census Tract Finder, please open an is
 streamlit run elligabletracts.py
 
 
-## Contributions
-Contributions to the Census Tract Finder are welcome. Please fork the repository, make your changes, and submit a pull request.
-
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact
-For any queries or feedback regarding the Census Tract Finder, please open an issue in the GitHub repository.
-
-## Acknowledgments
-- Thanks to the contributors of the Census Geocoder API for providing access to the data.
-- Appreciation to the maintainers of the HB550 data set (https://energy.maryland.gov/SiteAssets/Pages/CensusTractsRPS/110723%20MD%20HB%20550%20Eligible%20Census%20Tracts%20Full%20List.pdf) for making the information publicly available.
-
-
-
