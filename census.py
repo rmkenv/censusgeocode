@@ -13,7 +13,6 @@ def get_census_tract(street, city, state):
            f"&vintage=Census2020_Census2020"
            f"&layers=10"
            f"&format=json")
-
     # Make the API request
     response = requests.get(url)
     if response.status_code == 200:
@@ -34,7 +33,8 @@ def main():
     if st.button("Find Census Tract"):
         result = get_census_tract(street, city, state)
         if isinstance(result, dict):
-            st.json(result)
+            with st.expander("Show JSON Response", expanded=False):
+                st.json(result)
             
             # Extracting the required information
             try:
@@ -55,7 +55,7 @@ def main():
             except (KeyError, IndexError):
                 st.error("Could not extract the details from the response.")
         else:
-            st.write(result)
+            st.error(result)
 
 if __name__ == "__main__":
     main()
