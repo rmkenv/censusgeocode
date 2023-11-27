@@ -45,11 +45,11 @@ def main():
                 blkgrp = census_block['BLKGRP']
                 
                 # Display the information in a table
-                st.write("Extracted Information:")
+                st.write("Matched Address Information:")
                 info_table = pd.DataFrame({
                     'GEOID': [geoid],
-                    'BLOCK': [block],
-                    'BLKGRP': [blkgrp]
+                    'Block': [block],
+                    'Block Group': [blkgrp]
                 })
                 st.table(info_table)
             except (KeyError, IndexError):
