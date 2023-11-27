@@ -1,45 +1,47 @@
-# Census Tract Finder - GitHub README
+# Census Tract Finder
 
 ## Overview
-
-This repository contains code for a simple web application that utilizes the Census Geocoder API to find census tract information based on a street address. It's built using Streamlit for the web interface, Pandas for data manipulation, and the `requests` library for API calls.
+The Census Tract Finder is a Streamlit web application designed to help users find census tract information for a given address. It uses the Census Geocoder API to locate census tracts and compares the results with HB550 data.
 
 ## Features
+- Input fields for street, city, and state to find the corresponding census tract.
+- JSON response view for the API call.
+- Display of GEOID, Block, and Block Group from the census data.
+- Matching with HB550 data and displaying relevant information if a match is found.
+- User-friendly error handling for API issues or data mismatches.
 
-- **Census Tract Lookup**: Enter a street address to retrieve the census tract, block number, zip code, and geographical coordinates.
-- **Eligibility Check**: Compares the GEOID from the census data to a predefined list to determine eligibility for specific criteria based on MD HB 550.
-- **Error Handling**: Provides error messages if the API call is unsuccessful.
+## How to Use
+1. Enter the street, city, and state for the address you wish to find the census tract for.
+2. Click the "Find Census Tract" button to retrieve and display the information.
+3. If the address matches an area listed in HB 550, additional information will be displayed.
 
-## Installation
+## Data Sources
+- Census Geocoder API: Used to retrieve census tract information based on the provided address.
+- HB550 Data: A JSON file hosted on GitHub, containing areas related to HB550 legislation.
 
-1. Clone this repository.
-2. Install the requirements using `pip install -r requirements.txt` (assuming you have `pip` and Python already installed).
+## Setup and Installation
+To run this application on your local machine, you'll need to have Python installed along with the following libraries:
+- Streamlit
+- Requests
+- Pandas
 
-## Usage
+Clone the repository, navigate to the app's directory, and run:
+```bash
+streamlit run elligabletracts.py
 
-To run the web application:
 
-1. Execute `streamlit run app.py` in the terminal (assuming `app.py` is the filename of the script).
-2. The web interface should open in your default browser.
-3. Input the street, city, and state to get the census information and eligibility status.
+## Contributions
+Contributions to the Census Tract Finder are welcome. Please fork the repository, make your changes, and submit a pull request.
 
-## How It Works
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-- **API Call**: The `get_census_tract` function constructs a URL to query the Census Geocoder API and returns the JSON response.
-- **Data Extraction**: The `extract_details` function parses the JSON response to extract relevant details like the GEOID, block number, etc.
-- **CSV Data**: Reads a CSV file containing census tract data relevant to MD HB 550 for eligibility checking.
-- **Streamlit Interface**: The `main` function creates a user-friendly interface to input address data and view results.
+## Contact
+For any queries or feedback regarding the Census Tract Finder, please open an issue in the GitHub repository.
 
-## Streamlit App Flow
+## Acknowledgments
+- Thanks to the contributors of the Census Geocoder API for providing access to the data.
+- Appreciation to the maintainers of the HB550 data set (https://energy.maryland.gov/SiteAssets/Pages/CensusTractsRPS/110723%20MD%20HB%20550%20Eligible%20Census%20Tracts%20Full%20List.pdf) for making the information publicly available.
 
-1. The user enters a street address.
-2. Upon clicking "Find Census Tract", the app calls the Census Geocoder API.
-3. If successful, it displays the GEOID, block number, County, zip code, and coordinates.
-4. It then checks if the GEOID matches an eligible location according to MD HB 550 and informs the user accordingly.
 
-## Notes
 
-- Ensure that you have an internet connection to fetch data from the Census Geocoder API.
-- The CSV file for MD HB 550 eligibility is currently loaded from a remote URL.
-
-Feel free to fork, modify, and use this code as per your needs. If you encounter any issues, please open an issue in this repository.
