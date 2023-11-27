@@ -34,6 +34,25 @@ def main():
         result = get_census_tract(street, city, state)
         if isinstance(result, dict):
             st.json(result)
+            
+            # Extracting the required information
+            try:
+                address_matches = result['result']['addressMatches'][0]
+                census_block = address_matches['geographies']['Census Blocks'][0]
+                geoid = census_block['GEOID']
+                block = census_block['BLOCK']
+                blkgrp = census_block['BLKGRP']
+                
+                # Display the information in a table
+                st.write("Extracted Information:")
+                info_table = pd.DataFrame({
+                    'GEOID': [geoid],
+                    'BLOCK': [block],
+                    'BLKGRP': [blkgrp]
+                })
+                st.table(info_table)
+            except (KeyError, IndexError):
+                st.error("Could not extract the details from the response.")
         else:
             st.write(result)
 
