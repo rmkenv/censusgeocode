@@ -26,9 +26,9 @@ def main():
     st.title("Census Tract Finder")
 
     # Address inputs
-    street = st.text_input("Street", "4600 Silver Hill Rd")
-    city = st.text_input("City", "Washington")
-    state = st.text_input("State", "DC")
+    street = st.text_input("Street", "1400 Washington Bvld")
+    city = st.text_input("City", "Baltimore")
+    state = st.text_input("State", "MD")
 
     if st.button("Find Census Tract"):
         result = get_census_tract(street, city, state)
