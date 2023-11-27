@@ -9,6 +9,7 @@ The Census Tract Finder is a Streamlit web application designed to help users fi
 - Display of GEOID, Block, and Block Group from the census data.
 - Matching with HB550 data and displaying relevant information if a match is found.
 - User-friendly error handling for API issues or data mismatches.
+- See Flow Diagram: https://github.com/rmkenv/censusgeocode/blob/main/codetoflow.png
 
 ## How to Use
 1. Enter the street, city, and state for the address you wish to find the census tract for.
