@@ -72,6 +72,7 @@ def main():
                 hb550_match = next((item for item in hb550_data if item['GEOID'] == geoid), None)
                 
                 if hb550_match:
+                    st.success("This location is in an area listed in HB 550.") 
                     # Display the HB550 information in a table
                     hb550_info_table = pd.DataFrame([hb550_match])
                     st.table(hb550_info_table)
