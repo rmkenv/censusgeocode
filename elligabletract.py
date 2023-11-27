@@ -12,6 +12,16 @@ def fetch_hb550_data():
         st.error("Failed to load HB550 data.")
         return []
 
+# Function to fetch school data
+def fetch_school_data():
+    school_url = 'https://raw.githubusercontent.com/rmkenv/censusgeocode/main/MD_k12_to_20ACStract.geojson'
+    response = requests.get(school_url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        st.error("Failed to load school data.")
+        return []
+
 # Function to get census tract using Census Geocoder API
 def get_census_tract(street, city, state):
     # Construct the API request URL
@@ -34,11 +44,12 @@ def get_census_tract(street, city, state):
 def main():
     st.title("Census Tract Finder")
 
-    # Load HB550 data
+    # Load HB550 and school data
     hb550_data = fetch_hb550_data()
+    school_data = fetch_school_data()
 
     # Address inputs
-    street = st.text_input("Street", "1400 Washington Bvld")
+    street = st.text_input("Street", "1400 Washington Blvd")
     city = st.text_input("City", "Baltimore")
     state = st.text_input("State", "MD")
 
@@ -78,6 +89,17 @@ def main():
                     st.table(hb550_info_table)
                 else:
                     st.error("This location is NOT in an area listed in HB 550.")
+                    
+                # Find and display schools information
+                st.markdown("---")  # Horizontal line
+                st.header("Schools Information")
+                schools_matched = [feature['properties'] for feature in school_data['features']
+                                   if feature['properties']['GEOID20'] == geoid]
+                if schools_matched:
+                    schools_info_table = pd.DataFrame(schools_matched)
+                    st.table(schools_info_table)
+                else:
+                    st.info("No schools found for this GEOID.")
                     
             except (KeyError, IndexError):
                 st.error("Could not extract the details from the response.")
