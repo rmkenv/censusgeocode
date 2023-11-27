@@ -25,7 +25,7 @@ To run this application on your local machine, you'll need to have Python instal
 - Requests
 - Pandas
 
-Clone the repository, navigate to the app's directory, and run:
+## Clone the repository, navigate to the app's directory, and run:
 ```bash
 streamlit run elligabletracts.py
 
