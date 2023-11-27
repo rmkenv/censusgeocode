@@ -42,6 +42,6 @@ For any queries or feedback regarding the Census Tract Finder, please open an is
 
 ## Clone the repository, navigate to the app's directory, and run:
 ```bash
-streamlit run elligabletracts.py
+streamlit run elligabletract.py
 
 
