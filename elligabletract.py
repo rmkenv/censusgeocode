@@ -93,7 +93,7 @@ def main():
                 # Find and display schools information
                 st.markdown("---")  # Thick horizontal line
                 st.subheader("Schools Information")
-                st.write ("Please refer to the specific FOA to determine if this information is needed")
+                st.write ("Please refer to the specific Program FOA to determine if this information is needed.")
                 with st.expander("Schools Results"):
                 # Adding normal text note under header for schools 
                     st.write("This section shows information about schools associated with your address search. "
