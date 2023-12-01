@@ -79,10 +79,10 @@ def main():
                 
                 # Check if the GEOID is in the HB550 data and display relevant information
                 st.markdown("---")  # Thick horizontal line
-                st.subheader("HB550 Information")  # Subheader for HB550
+                st.subheader("MD HB550 Information")  # Subheader for HB550
                 # Add a link to a PDF
                 pdf_url = "https://mgaleg.maryland.gov/2023RS/chapters_noln/Ch_98_hb0550T.pdf"
-                st.markdown(f"[Review MD HB550 PDF Document:https://mgaleg.maryland.gov/2023RS/chapters_noln/Ch_98_hb0550T.pdf]({pdf_url})", unsafe_allow_html=True)
+                st.markdown(f"[Review MD HB550:https://mgaleg.maryland.gov/2023RS/chapters_noln/Ch_98_hb0550T.pdf]({pdf_url})", unsafe_allow_html=True)
                 hb550_match = next((item for item in hb550_data if item['GEOID'] == geoid), None)
                 
                 if hb550_match:
