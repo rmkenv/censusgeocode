@@ -106,7 +106,7 @@ def main():
                         schools_info_table = pd.DataFrame(schools_matched)
                         st.table(schools_info_table)
                     else:
-                        st.info("No schools found for this GEOID.")
+                        st.info("No schools found for this Census Tract.")
                     
             except (KeyError, IndexError):
                 st.error("Could not extract the details from the response.")
