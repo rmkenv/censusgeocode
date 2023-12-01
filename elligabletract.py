@@ -49,8 +49,8 @@ def main():
     school_data = fetch_school_data()
 
     # Address inputs
-    street = st.text_input("Street", "1400 Washington Blvd")
-    city = st.text_input("City", "Baltimore")
+    street = st.text_input("Street", "100 State Circle")
+    city = st.text_input("City", "Annapolis")
     state = st.text_input("State", "MD")
 
     if st.button("Find Census Tract"):
