@@ -93,6 +93,8 @@ def main():
                 # Find and display schools information
                 st.markdown("---")  # Thick horizontal line
                 st.subheader("Schools Information")  # Subheader for Schools
+                # Adding normal text note under header for schools 
+                st.text("This section shows information about schools associated with your address search. Note that some listed schools may not be physically located in an eligible census tract. However, they may enroll students who reside in qualifying tracts. Please contact MEA if you need help determining your eligibility based on school attendance boundaries. Feel free to reach out with any other questions as well.")
                 schools_matched = [feature['properties'] for feature in school_data['features']
                                    if feature['properties']['GEOID20'] == geoid]
                 if schools_matched:
