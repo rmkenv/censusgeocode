@@ -95,13 +95,13 @@ def main():
                 with st.expander("Schools Information"):
                 # Adding normal text note under header for schools 
                     st.text("This section shows information about schools associated with your address search. Note that some listed schools may not be physically located in an eligible census tract. However, they may enroll students who reside in qualifying tracts. Please contact MEA if you need help determining your eligibility based on school attendance boundaries. Feel free to reach out with any other questions as well.")
-                schools_matched = [feature['properties'] for feature in school_data['features']
+                    schools_matched = [feature['properties'] for feature in school_data['features']
                                    if feature['properties']['GEOID20'] == geoid]
-                if schools_matched:
-                    schools_info_table = pd.DataFrame(schools_matched)
-                    st.table(schools_info_table)
-                else:
-                    st.info("No schools found for this GEOID.")
+                    if schools_matched:
+                        schools_info_table = pd.DataFrame(schools_matched)
+                        st.table(schools_info_table)
+                    else:
+                        st.info("No schools found for this GEOID.")
                     
             except (KeyError, IndexError):
                 st.error("Could not extract the details from the response.")
