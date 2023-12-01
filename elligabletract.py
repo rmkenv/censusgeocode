@@ -44,9 +44,9 @@ def get_census_tract(street, city, state):
 def main():
     st.title("Census Tract Finder")
 
-   # Clear cache button
+    # Clear cache button
     if st.button('Clear cache'):
-        st.legacy_caching.clear_cache()
+        st.cache.clear_cache()
         st.success('Cache cleared!')
 
     
