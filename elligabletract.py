@@ -44,12 +44,6 @@ def get_census_tract(street, city, state):
 def main():
     st.title("Census Tract Finder")
 
-    # Clear cache button
-    if st.button('Clear cache'):
-        st.cache.clear_cache()
-        st.success('Cache cleared!')
-
-    
     # Load HB550 and school data
     hb550_data = fetch_hb550_data()
     school_data = fetch_school_data()
