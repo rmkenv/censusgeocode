@@ -92,7 +92,9 @@ def main():
                     
                 # Find and display schools information
                 st.markdown("---")  # Thick horizontal line
-                with st.expander("Schools Information"):
+                st.subheader("Schools Information")
+                    st.write ("Please refer to the specific FOA to determine if this information is needed")
+                with st.expander("Schools Results"):
                 # Adding normal text note under header for schools 
                     st.write("This section shows information about schools associated with your address search. "
                              "Note that some listed schools may not be physically located in an eligible census tract. "
