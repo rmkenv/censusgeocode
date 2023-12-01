@@ -78,8 +78,8 @@ def main():
                 st.table(info_table)
                 
                 # Check if the GEOID is in the HB550 data and display relevant information
-                st.markdown("---")  # Horizontal line
-                st.header("HB550 Information")
+                st.markdown("---")  # Thick horizontal line
+                st.subheader("HB550 Information")  # Subheader for HB550
                 hb550_match = next((item for item in hb550_data if item['GEOID'] == geoid), None)
                 
                 if hb550_match:
@@ -91,8 +91,8 @@ def main():
                     st.error("This location is NOT in an area listed in HB 550.")
                     
                 # Find and display schools information
-                st.markdown("---")  # Horizontal line
-                st.header("Schools Information")
+                st.markdown("---")  # Thick horizontal line
+                st.subheader("Schools Information")  # Subheader for Schools
                 schools_matched = [feature['properties'] for feature in school_data['features']
                                    if feature['properties']['GEOID20'] == geoid]
                 if schools_matched:
